@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String   @default("")
+  bio          String   @default("")
+  avatar       String   @default("") // small data-URL (160x160 jpeg)
+  createdAt    DateTime @default(now())
+  tasks        Task[]
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekStart String // Monday of the week, "YYYY-MM-DD"
+  day       Int // 0 = Mon ... 6 = Sun
+  name      String
+  desc      String   @default("")
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, weekStart])
+}
